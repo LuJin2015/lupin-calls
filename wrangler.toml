@@ -1,0 +1,12 @@
+name = "lupin-calls-signaling"
+main = "workers/worker.js"
+compatibility_date = "2026-10-13"
+
+[durable_objects]
+bindings = [
+  { name = "ROOMS", class_name = "GameRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]
