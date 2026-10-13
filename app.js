@@ -7,7 +7,24 @@ const $ = (id) => document.getElementById(id);
 const state = { stream: null, previewStream: null, socket: null, room: "", name: "", id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2), peers: new Map(), pendingCandidates: new Map(), cameraOn: true, micOn: true, screenStream: null, screenTrack: null, joined: false, closing: false };
 
 $("year").textContent = new Date().getFullYear();
-$("displayName").value = window.LUPIN_AUTH?.current() || localStorage.getItem("lupinCallsName") || "";
+let callsCloudUser = window.LUPIN_AUTH?.current() || "";
+$("displayName").value = callsCloudUser || localStorage.getItem("lupinCallsName") || "";
+window.addEventListener("lupin-auth-change", event => {
+  const nextUser = event.detail?.user?.username || "";
+  if (nextUser) {
+    callsCloudUser = nextUser;
+    $("displayName").value = nextUser;
+    localStorage.setItem("lupinCallsName", nextUser);
+    if (!state.joined) setConnection("Lupin Cloud · " + nextUser);
+  } else if (callsCloudUser) {
+    if ($("displayName").value === callsCloudUser) {
+      $("displayName").value = "";
+      localStorage.removeItem("lupinCallsName");
+    }
+    callsCloudUser = "";
+    if (!state.joined) setConnection("Ready when you are");
+  }
+});
 $("roomCode").addEventListener("input", () => { $("roomCode").value = $("roomCode").value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12); });
 $("displayName").addEventListener("input", () => localStorage.setItem("lupinCallsName", $("displayName").value.trim().slice(0, 32)));
 $("createRoom").addEventListener("click", () => enterRoom(makeRoomCode()));
