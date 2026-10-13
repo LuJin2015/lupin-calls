@@ -1,15 +1,24 @@
 # Lupin Calls
 
-A lightweight, browser-based video calling app built with WebRTC and Cloudflare Durable Objects.
+A browser-based video calling app using WebRTC and Cloudflare Durable Objects.
 
-## Features
+## Included
 
-- Create a room or join with a room code
+- Create or join a call using a room code
 - Camera and microphone controls
 - Screen sharing
-- Multi-participant mesh calls (best for small groups)
-- Responsive layout and pre-join device preview
-- No account required for the starter version
+- Responsive layout and optional camera preview
+- WebRTC peer-to-peer media for small group calls
+- Cloudflare Worker signalling endpoint: https://lupin-calls-signaling.lujinsg.workers.dev/health
+
+## Open the site
+
+GitHub Pages deployment is configured in .github/workflows/pages.yml.
+
+1. Open this repository's Settings → Pages.
+2. Set the build and deployment source to **GitHub Actions** if it is not already selected.
+3. Open the Actions tab and check the latest “Deploy Lupin Calls to GitHub Pages” run.
+4. Once successful, open https://lujin2015.github.io/lupin-calls/.
 
 ## Run locally
 
@@ -19,19 +28,13 @@ Camera and microphone access require a secure context, so use localhost or HTTPS
 
 Then open http://localhost:8000.
 
-## Deploy the frontend
+## Signalling service
 
-1. Open Settings → Pages in this repository.
-2. Choose Deploy from a branch, branch main, folder / (root).
-3. Save and wait for deployment.
+The Worker source is in workers/worker.js and its configuration is in wrangler.toml. The deployed endpoint is configured in app.js. The Worker relays room membership and WebRTC offer/answer/ICE messages; it does not relay audio or video.
 
-## Deploy signalling
+## Important limitations
 
-The frontend needs a deployed signalling Worker to exchange WebRTC offers, answers, and ICE candidates. Follow workers/README.md to deploy the Worker and set its URL in app.js.
-
-## Important notes
-
-- This starter uses peer-to-peer WebRTC and is intended for small groups.
-- Some networks require a TURN relay for reliable connectivity. STUN alone cannot guarantee every network combination will connect.
-- The signalling Worker relays call setup messages, not audio or video.
-- Room codes are identifiers, not passwords. Share them only with intended participants.
+- Calls use a peer-to-peer mesh and are intended for small groups, not large webinars.
+- The app uses a public STUN server. Some networks require a TURN relay, so connection success is not guaranteed on every network.
+- Room codes are identifiers, not passwords. Share them only with people you intend to invite.
+- Camera and microphone access requires user permission.
