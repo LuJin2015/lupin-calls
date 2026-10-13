@@ -4,7 +4,7 @@
 const SIGNALING_URL = "wss://lupin-calls-signaling.lujinsg.workers.dev/ws";
 const ICE_SERVERS = [{ urls: "stun:stun.l.google.com:19302" }];
 const $ = (id) => document.getElementById(id);
-const state = { stream: null, previewStream: null, socket: null, room: "", name: "", id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2), peers: new Map(), cameraOn: true, micOn: true, screenStream: null, screenTrack: null, joined: false, closing: false };
+const state = { stream: null, previewStream: null, socket: null, room: "", name: "", id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2), peers: new Map(), pendingCandidates: new Map(), cameraOn: true, micOn: true, screenStream: null, screenTrack: null, joined: false, closing: false };
 
 $("year").textContent = new Date().getFullYear();
 $("displayName").value = localStorage.getItem("lupinCallsName") || "";
@@ -168,8 +168,14 @@ async function handleSignal(message) {
     return;
   }
   if (message.type === "ice") {
+    if (!message.candidate) return;
     const peer = state.peers.get(message.from);
-    if (!peer || !message.candidate) return;
+    if (!peer) {
+      const queue = state.pendingCandidates.get(message.from) || [];
+      queue.push(message.candidate);
+      state.pendingCandidates.set(message.from, queue);
+      return;
+    }
     if (peer.pc.remoteDescription) {
       try { await peer.pc.addIceCandidate(new RTCIceCandidate(message.candidate)); } catch (e) { console.warn("ICE candidate skipped", e); }
     } else peer.pendingIce.push(message.candidate);
@@ -207,7 +213,8 @@ function getPeer(id, name) {
   caption.append(dot, nameLabel);
   tile.append(video, placeholder, caption);
   $("videoGrid").append(tile);
-  const peer = { id, name: name || "Guest", pc, tile, video, placeholder, pendingIce: [], offering: false };
+  const peer = { id, name: name || "Guest", pc, tile, video, placeholder, pendingIce: state.pendingCandidates.get(id) || [], offering: false };
+  state.pendingCandidates.delete(id);
   state.peers.set(id, peer);
   if (state.stream) state.stream.getTracks().forEach(track => pc.addTrack(track, state.stream));
   pc.onicecandidate = event => { if (event.candidate) sendSignal({ type: "ice", to: id, candidate: event.candidate }); };
