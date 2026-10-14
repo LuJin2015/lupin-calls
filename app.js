@@ -26,6 +26,11 @@ window.addEventListener("lupin-auth-change", event => {
     if (!state.joined) setConnection("Ready when you are");
   }
 });
+// The storage event fires in this tab when another Lupin service changes the shared account.
+window.addEventListener("storage", event => {
+  if (event.key !== "lupinCurrentUser" && event.key !== "lupinCloudAccount") return;
+  window.dispatchEvent(new CustomEvent("lupin-auth-change", { detail: { user: readLupinCurrentUser() } }));
+});
 $("roomCode").addEventListener("input", () => { $("roomCode").value = $("roomCode").value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12); });
 $("displayName").addEventListener("input", () => localStorage.setItem("lupinCallsName", $("displayName").value.trim().slice(0, 32)));
 $("createRoom").addEventListener("click", () => enterRoom(makeRoomCode()));
