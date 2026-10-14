@@ -7,10 +7,11 @@ const $ = (id) => document.getElementById(id);
 const state = { stream: null, previewStream: null, socket: null, room: "", name: "", id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2), peers: new Map(), pendingCandidates: new Map(), cameraOn: true, micOn: true, screenStream: null, screenTrack: null, joined: false, closing: false };
 
 $("year").textContent = new Date().getFullYear();
-let callsCloudUser = window.LUPIN_AUTH?.current() || "";
+const readLupinCurrentUser = () => { try { return JSON.parse(localStorage.getItem("lupinCurrentUser") || "null"); } catch { return null; } };
+let callsCloudUser = window.LUPIN_AUTH?.current() || readLupinCurrentUser()?.username || "";
 $("displayName").value = callsCloudUser || localStorage.getItem("lupinCallsName") || "";
 window.addEventListener("lupin-auth-change", event => {
-  const nextUser = event.detail?.user?.username || "";
+  const nextUser = event.detail?.user?.username || readLupinCurrentUser()?.username || "";
   if (nextUser) {
     callsCloudUser = nextUser;
     $("displayName").value = nextUser;
