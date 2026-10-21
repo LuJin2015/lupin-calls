@@ -38,3 +38,14 @@ The Worker source is in workers/worker.js and its configuration is in wrangler.t
 - The app uses a public STUN server. Some networks require a TURN relay, so connection success is not guaranteed on every network.
 - Room codes are identifiers, not passwords. Share them only with people you intend to invite.
 - Camera and microphone access requires user permission.
+
+## Credits
+
+**Project Lead:** Lu Jin
+
+**AI Development Assistant:** ChatGPT by OpenAI
+
+ChatGPT assisted with coding, debugging, documentation, and design. The Lupin projects were developed through human direction and AI assistance.
+
+Intellectual property rights remain subject to applicable law and the rights of the respective contributors and third-party authors.
+
