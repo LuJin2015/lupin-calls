@@ -1,0 +1,44 @@
+name: ShipIT Forge Security Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Deny permissions by default; each job grants only what it needs.
+permissions: {}
+
+jobs:
+  syntax-check:
+    name: JavaScript syntax
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Check app.js syntax
+        run: node --check app.js
+
+      - name: Check Worker syntax
+        run: node --check workers/worker.js
+
+  security-scan:
+    name: ShipIT Forge security scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - name: Run deterministic security scanners (no AI)
+        uses: shipiit/forge@1534c1897241c32af6248209a657afe5bc39bc5b
+        with:
+          secret-scan: '1'
+          code-scan: '1'
+          scan-block-on: high
+        env:
+          # Keep AI routes disabled. No model API key is supplied.
+          FORGE_AUTO_REVIEW: off
+          FORGE_AUTO_FIX: off
+          GITHUB_TOKEN: ${{ github.token }}
