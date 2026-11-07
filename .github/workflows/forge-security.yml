@@ -32,7 +32,7 @@ jobs:
       checks: write
     steps:
       - name: Run deterministic security scanners (no AI)
-        uses: shipiit/forge@1534c1897241c32af6248209a657afe5bc39bc5b
+        uses: shipiit/forge@a1ea1545019ac2450a07835823f9c4d5173391c3
         with:
           secret-scan: '1'
           code-scan: '1'
